@@ -1,0 +1,18 @@
+-- Name: ffmpeg.sql
+-- Description: Used to setup ffmpeg paths in a new install
+
+INSERT INTO ConfigElement(Key, Value) 
+SELECT 'ffmpeg.ffmpeg_path', '{{ _ersatztv_install_dir }}/ffmpeg-bin/ffmpeg'
+WHERE NOT EXISTS(
+    SELECT Id
+    FROM ConfigElement 
+    WHERE Key = 'ffmpeg.ffmpeg_path'
+);
+
+INSERT INTO ConfigElement(Key, Value) 
+SELECT 'ffmpeg.ffprobe_path', '{{ _ersatztv_install_dir }}/ffmpeg-bin/ffprobe'
+WHERE NOT EXISTS(
+    SELECT Id
+    FROM ConfigElement 
+    WHERE Key = 'ffmpeg.ffprobe_path'
+);

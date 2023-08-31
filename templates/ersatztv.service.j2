@@ -1,0 +1,16 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description = ErsatzTV
+After       = network.target
+
+[Service]
+Type    = simple
+User    = {{ _ersatztv_svc }}
+Group   = {{ _ersatztv_svc }}
+Restart = always
+Environment = XDG_DATA_HOME={{ _ersatztv_data_dir }}
+ExecStart   = {{ _ersatztv_install_dir }}/ErsatzTV
+
+[Install]
+WantedBy = multi-user.target

@@ -1,0 +1,31 @@
+---
+
+# ErsatzTV Variables
+
+_ersatztv_repo: https://github.com/ErsatzTV/ErsatzTV
+
+_ersatztv_download_path: /var/tmp/ansible-role-ersatztv
+
+_ersatztv_svc: "{{ ersatztv_user | default('root') }}"
+
+_ersatztv_install_dir: "{{ ersatztv_install_dir | default('/opt/ersatztv') }}"
+
+_ersatztv_data_dir: "{{ ersatztv_data_dir | default('/var/lib/ersatztv') }}"
+
+# FFMPEG Variables
+
+_ersatztv_ffmpeg_url: https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz
+
+# Misc Variables
+
+_package_deps:
+  RedHat: 
+    pkgs:
+      - libicu
+      - git-core
+      - sqlite
+  AlmaLinux:
+    pkgs:
+      - libicu
+      - git-core
+      - sqlite

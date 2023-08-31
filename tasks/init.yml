@@ -1,0 +1,31 @@
+---
+
+- name: Include shared variables
+  ansible.builtin.include_vars: main.yml
+
+- name: Install package dependencies on the host
+  ansible.builtin.package:
+    name: "{{ _package_deps[ansible_distribution]['pkgs'] }}"
+    state: present
+
+- name: Create temporary download directory
+  ansible.builtin.file:
+    path: "{{ _ersatztv_download_path }}"
+    state: directory
+    mode: 0755
+
+- name: Determine version of ErsatzTV to download
+  when: ersatztv_version == "latest"
+  block:
+    - name: Get the version information from ErsatzTV repository
+      ansible.builtin.command: git ls-remote {{ _ersatztv_repo }} 'refs/tags/*'
+      register: etv_version_info
+
+    - name:  Set version variable to latest tag found in list
+      ansible.builtin.set_fact:
+        etv_version: "{{ etv_version_info.stdout_lines[-1].split('refs/tags/')[1] }}"
+
+- name: Set version variable to user-defined version
+  when: etv_version is not defined and ersatztv_version != "latest"
+  ansible.builtin.set_fact:
+    etv_version: "{{ ersatztv_version }}"

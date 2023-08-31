@@ -1,0 +1,92 @@
+---
+
+- ansible.builtin.include_tasks: init.yml
+
+- name: Create service account
+  when: _ersatztv_svc != "root"
+  ansible.builtin.user:
+    name: "{{ _ersatztv_svc }}"
+    home: "{{ _ersatztv_data_dir }}"
+
+- name: Create directories required for the service
+  loop:
+    - path: "{{ _ersatztv_install_dir }}"
+    - path: "{{ _ersatztv_install_dir }}/ffmpeg-bin"
+    - path: "{{ _ersatztv_data_dir }}"
+      owner: "{{ _ersatztv_svc }}"
+      group: "{{ _ersatztv_svc }}"
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: 0755
+
+- name: Copy the application files to the install directory
+  notify: restart ersatztv
+  ansible.builtin.copy:
+    src: "{{ _ersatztv_download_path }}/ErsatzTV-{{ etv_version }}-linux-x64/"
+    dest: "{{ _ersatztv_install_dir }}"
+    owner: root
+    group: root
+    remote_src: true
+
+  # so the reason why I am extracting the archive in the install and not in the download
+  # is that I need a way to get the path of the ffmpeg version-specific directory. I 
+  # didn't want to have to write some script that will check for the directory. This
+  # option seemed to be the easiest.
+- name: Installing ffmpeg
+  block:
+    - name: Extract the downloaded ffmpeg archive
+      register: etv_ffmpeg_extracted_archive
+      ansible.builtin.unarchive:
+        src: "{{ _ersatztv_download_path }}/ffmpeg-git-amd64-static.tar.xz"
+        dest: "{{ _ersatztv_download_path }}"
+        remote_src: true
+        list_files: true
+    
+    - name: Copy the ffmpeg files to the install directory
+      notify: restart ersatztv
+      ansible.builtin.copy:
+        src: "{{ _ersatztv_download_path }}/{{ etv_ffmpeg_extracted_archive.files[0].rstrip('/') }}/"
+        dest: "{{ _ersatztv_install_dir }}/ffmpeg-bin"
+        remote_src: true
+
+- name: Install the systemd service
+  notify:
+    - systemd daemonreload
+  ansible.builtin.template:
+    src: ersatztv.service.j2
+    dest: /etc/systemd/system/ersatztv.service
+    owner: root
+    group: root
+    mode: 0644
+
+  # run any pending handlers prior to running the post-config step
+  # in the post setup, there will be steps to configure the settings so 
+  # we need to have the service running.
+- meta: flush_handlers
+
+- name: Restart ErsatzTV service to apply any changes
+  ansible.builtin.service:
+    name: ersatztv
+    state: restarted
+    enabled: true
+
+- name: Wait for the service to officially start
+  ansible.builtin.wait_for:
+    port: 8409
+    delay: 10
+    timeout: 60
+
+- name: Adjust the ErsatzTV configuration
+  block:
+    - name: Upload tmp sql script
+      ansible.builtin.template:
+        src: ffmpeg.sql.j2
+        dest: "{{ _ersatztv_download_path }}/ffmpeg.sql"
+
+    - name: Add ffmpeg paths to app config
+      ansible.builtin.command: sqlite3 ersatztv.sqlite3 '.read {{ _ersatztv_download_path }}/ffmpeg.sql'
+      args:
+        chdir: "{{ _ersatztv_data_dir }}/ersatztv"

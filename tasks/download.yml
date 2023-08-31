@@ -1,0 +1,43 @@
+---
+
+- ansible.builtin.include_tasks: init.yml
+
+- name: Download the ErsatzTV archive
+  register: etv_archive
+  until: 'etv_archive is not failed'
+  retries: 3
+  delay: 5
+  ignore_errors: true
+  ansible.builtin.unarchive:
+    src: "{{ _ersatztv_repo }}/releases/download/{{ etv_version }}/ErsatzTV-{{ etv_version }}-linux-x64.tar.gz"
+    dest: "{{ _ersatztv_download_path }}"
+    remote_src: true
+    list_files: true
+    creates: "{{ _ersatztv_download_path }}/ErsatzTV-{{ etv_version }}-linux-x64"
+
+- name: Downloading ffmpeg
+  block:
+    - name: Download the latest ffmpeg archive
+      register: etv_ffmpeg_archive
+      until: 'etv_ffmpeg_archive is not failed'
+      retries: 3
+      delay: 5
+      ignore_errors: true
+      ansible.builtin.get_url:
+        url: "{{ _ersatztv_ffmpeg_url }}"
+        dest: "{{ _ersatztv_download_path }}"
+        decompress: false
+  
+# - name: Set source paths for the downloaded archives
+#   when:
+#     - 'etv_archive is not failed'
+#     - 'etv_ffmpeg_archive is not failed'
+#   block:
+#     - ansible.builtin.set_fact:
+#         etv_source_path: "{{ _etv_tmp_download_path }}/ErsatzTV-v0.8.0-beta-linux-x64/"
+#         etv_ffmpeg_source_path: "{{ _etv_tmp_download_path }}/ffmpeg-git-20230721-amd64-static//"
+#   rescue:
+#     - name: Cleanup download directory
+#       ansible.builtin.file:
+#         path: "{{ _etv_tmp_download_path }}"
+#         state: absent
