@@ -23,7 +23,7 @@
     mode: 0755
 
 - name: Copy the application files to the install directory
-  notify: restart ersatztv
+  register: etv_install_status
   ansible.builtin.copy:
     src: "{{ _ersatztv_download_path }}/ErsatzTV-{{ etv_version }}-linux-x64/"
     dest: "{{ _ersatztv_install_dir }}"
@@ -46,15 +46,15 @@
         list_files: true
     
     - name: Copy the ffmpeg files to the install directory
-      notify: restart ersatztv
+      register: etv_ffmpeg_install_status
       ansible.builtin.copy:
         src: "{{ _ersatztv_download_path }}/{{ etv_ffmpeg_extracted_archive.files[0].rstrip('/') }}/"
         dest: "{{ _ersatztv_install_dir }}/ffmpeg-bin"
         remote_src: true
 
 - name: Install the systemd service
-  notify:
-    - systemd daemonreload
+  notify: systemd daemonreload
+  register: etv_service_install_status
   ansible.builtin.template:
     src: ersatztv.service.j2
     dest: /etc/systemd/system/ersatztv.service
@@ -67,7 +67,11 @@
   # we need to have the service running.
 - meta: flush_handlers
 
+  # only restart the service if a new version of ErsatzTV was installed, new
+  # ffmpeg was installed, or there was an update to the systemd service file.
 - name: Restart ErsatzTV service to apply any changes
+  when: etv_install_status is changed or etv_ffmpeg_install_status is changed or
+        etv_service_install_status is changed
   ansible.builtin.service:
     name: ersatztv
     state: restarted
@@ -89,6 +93,8 @@
         src: ffmpeg.sql.j2
         dest: "{{ _ersatztv_download_path }}/ffmpeg.sql"
 
+    # im not too concerned with this step showing as changed all the time. I made the SQL script 
+    # idempotent so it will only insert if the ffmpeg paths don't already exist.
     - name: Add ffmpeg paths to app config
       ansible.builtin.command: sqlite3 ersatztv.sqlite3 '.read {{ _ersatztv_download_path }}/ffmpeg.sql'
       args:
