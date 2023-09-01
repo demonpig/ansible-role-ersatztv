@@ -3,9 +3,3 @@
 - name: systemd daemonreload
   ansible.builtin.systemd_service:
     daemon_reload: true
-
-- name: restart ersatztv
-  ansible.builtin.service:
-    name: ersatztv
-    state: restarted
-    enabled: true

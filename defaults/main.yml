@@ -1,3 +1,9 @@
 ---
 
+# Type: string
+#
+# Description:
+# Version of the ErsatzTV to install on the managed host. The role will search
+# the application's tags in its repository. The role will fail if it can't
+# find the tag.
 ersatztv_version: latest

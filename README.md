@@ -1,38 +1,55 @@
-Role Name
-=========
+# demonpig.ersatztv
 
-A brief description of the role goes here.
+This role will install [ErsatzTV](https://github.com/ErsatzTV/ErsatzTV) onto a managed host. The application allows for creating an IPTV service using local media files.
 
-Requirements
-------------
+### Requirements
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Nothing at the moment.
 
-Role Variables
---------------
+### Role Variables
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+```yaml
+ersatztv_version: latest
+```
 
-Dependencies
-------------
+Specifies the version of the ErsatzTV to install on the managed host. The role pulls the artifacts from https://github.com/ErsatzTV/ErsatzTV/releases.
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+If the variable is set to `latest` (default), then the role will perform a check against the repository for the latest release.
 
-Example Playbook
-----------------
+```yaml
+ersatztv_user: root
+```
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+Service account that ErsatzTV will run as on the managed host.
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```yaml
+ersatztv_install_dir: /opt/ersatztv
+```
 
-License
--------
+This is the directory where ErsatzTV will be installed.
 
-BSD
+```yaml
+ersatztv_data_dir: /var/lib/ersatztv
+```
 
-Author Information
-------------------
+This is the directory where ErsatzTV's user-data will be located.
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+### Dependencies
+
+- Ansible 2.9+
+
+### Example Playbook
+
+```yaml
+---
+
+- name: Install ErsatzTV
+  hosts: all
+
+  roles:
+    - name: demonpig.ersatztv
+```
+
+### License
+
+MIT

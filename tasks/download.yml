@@ -7,7 +7,6 @@
   until: 'etv_archive is not failed'
   retries: 3
   delay: 5
-  ignore_errors: true
   ansible.builtin.unarchive:
     src: "{{ _ersatztv_repo }}/releases/download/{{ etv_version }}/ErsatzTV-{{ etv_version }}-linux-x64.tar.gz"
     dest: "{{ _ersatztv_download_path }}"
@@ -20,7 +19,6 @@
   until: 'etv_ffmpeg_archive is not failed'
   retries: 3
   delay: 5
-  ignore_errors: true
   ansible.builtin.get_url:
     url: "{{ _ersatztv_ffmpeg_url }}"
     dest: "{{ _ersatztv_download_path }}"

@@ -73,6 +73,9 @@
     state: restarted
     enabled: true
 
+  # this is needed as the application has an initial startup processes. we
+  # are essentially waiting for the ersatztv.sqlite3 database file to be
+  # created.
 - name: Wait for the service to officially start
   ansible.builtin.wait_for:
     port: 8409
