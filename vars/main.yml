@@ -29,3 +29,8 @@ _package_deps:
       - libicu
       - git-core
       - sqlite
+  Debian:
+    pkgs:
+      - libicu72
+      - git
+      - sqlite3

@@ -30,6 +30,9 @@ galaxy_info:
     - name: EL
       version:
         - 9
+    - name: Debian
+      version:
+        - 12
 
   galaxy_tags:
     - ersatztv
