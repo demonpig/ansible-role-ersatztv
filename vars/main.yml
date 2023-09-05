@@ -4,7 +4,7 @@
 
 _ersatztv_repo: https://github.com/ErsatzTV/ErsatzTV
 
-_ersatztv_download_path: /var/tmp/ansible-role-ersatztv
+_ersatztv_download_path: "{{ ersatztv_download_path | default('/var/tmp/ansible-role-ersatztv') }}"
 
 _ersatztv_svc: "{{ ersatztv_user | default('root') }}"
 
