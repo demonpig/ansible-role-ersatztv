@@ -35,7 +35,7 @@ ersatztv_data_dir: /var/lib/ersatztv
 This is the directory where ErsatzTV's user-data will be located.
 
 ```yaml
-ersatztv_download_path: "/var/tmp/ansible-role-ersatztv"
+ersatztv_download_path: /var/tmp/ansible-role-ersatztv
 ```
 
 Specifies the path to download the ErsatzTV and ffmpeg archives to. 
